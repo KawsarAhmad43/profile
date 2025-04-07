@@ -1,44 +1,164 @@
-.sidebar {
-    background-color: #98a0a9;
-    padding: 20px;
-    width: 80%;
-    height: 90vh;
-    border-radius: 10px;
-    margin: 20px 0;
-    font-size: 25px;
-    font-weight: bold;
-  }
-  .main-content {
-    padding: 20px;
-  }
-  .nav-link.hoverable:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  .content-section {
-    display: none;
-  }
-  .active-content {
-    display: block;
-  }
-  .project-item {
-    border: 1px solid #ccc;
-    padding: 15px;
-    margin-bottom: 15px;
-  }
-  .contact-icons i {
-    margin: 10px;
-    color: #007bff; 
-    transition: color 0.3s ease-in-out;
-  }
+/* Base styling */
+body {
+    background: #121212;
+    color: #e0e0e0;
+    font-family: 'Orbitron', sans-serif;
+    margin: 0;
+    padding: 0;
+}
 
-  .contact-icons i:hover {
-    color: #0056b3; 
-  }
-  a {
+.container {
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+/* Hidden elements */
+.hidden {
+    display: none;
+}
+
+/* Glassmorphism effect */
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 30px;
+    margin-bottom: 40px;
+}
+
+/* Fade in animation */
+.fadeIn {
+    animation: fadeIn 0.8s forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Loader styling */
+.loader {
+    border: 8px solid rgba(255, 255, 255, 0.2);
+    border-top: 8px solid #e0e0e0;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Back to Prompt Button */
+#backButton {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+/* Home Section Styling */
+#homeSection {
+    text-align: center;
+}
+
+#homeSection h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    letter-spacing: 1.5px;
+}
+
+#homeSection p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    letter-spacing: 1.5px;
+}
+
+/* Profile image styling */
+.profile-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Prompt input styling */
+.prompt-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    padding: 12px 20px;
+    color: #e0e0e0;
+    font-size: 1.1rem;
+}
+
+.prompt-input:focus {
+    box-shadow: none;
+    border-color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Available Prompts Styling */
+#availablePrompts {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+#availablePrompts ul {
     list-style: none;
-    text-decoration: none;
-  }
-  a:hover {
-    list-style: none;
-    text-decoration: none;
-  }
+    padding-left: 0;
+    margin: 0;
+}
+
+#availablePrompts li {
+    cursor: pointer;
+    padding: 10px;
+    letter-spacing: 1.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#availablePrompts li:last-child {
+    border-bottom: none;
+}
+
+#availablePrompts li:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Button Styling */
+.btn-custom {
+    border-radius: 50px;
+    font-size: 1rem;
+    padding: 10px 20px;
+    margin-top: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #homeSection h1 {
+        font-size: 2rem;
+    }
+
+    .profile-img {
+        width: 120px;
+        height: 120px;
+    }
+}

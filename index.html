@@ -1,467 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <title>Kawsar Ahmad</title>
-    <link rel="stylesheet" href="assets/css/style.css" />
-  </head>
-  <body>
-    <!-- Responsive Navbar for Mobile -->
-    <nav
-      class="navbar navbar-expand-lg navbar-light bg-light d-block d-lg-none"
-    >
-      <!-- <a class="navbar-brand" href="#">Kawsar Ahmad</a> -->
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">"menu" = [</li>
-          <li class="nav-item">
-            <a
-              class="nav-link hoverable active"
-              href="javascript:void(0)"
-              style="color: #000"
-              onclick="showContent('about')"
-              >About Me,</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link hoverable"
-              href="javascript:void(0)"
-              style="color: #000"
-              onclick="showContent('career')"
-              >Work Experience,</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link hoverable"
-              href="javascript:void(0)"
-              style="color: #000"
-              onclick="showContent('skills')"
-              >Skills,</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link hoverable"
-              href="javascript:void(0)"
-              style="color: #000"
-              onclick="showContent('projects')"
-              >Projects,</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link hoverable"
-              href="javascript:void(0)"
-              style="color: #000"
-              onclick="showContent('contact')"
-              >Contact</a
-            >
-          </li>
-          <li class="nav-item">]</li>
-        </ul>
-      </div>
-    </nav>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Futuristic Portfolio</title>
+    <!-- Bootstrap CSS (using Bootstrap 4 for compatibility) -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <!-- Google Fonts for futuristic look -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
 
-    <!-- Main Content Container -->
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar (visible on larger screens) -->
-        <div class="col-md-4 d-none d-lg-block">
-          <div class="sidebar">
-            <ul class="nav flex-column">
-              <li class="nav-item">"menu" = [</li>
-              <li class="nav-item">
-                <a
-                  class="nav-link hoverable active"
-                  href="javascript:void(0)"
-                  style="color: #fff"
-                  onclick="showContent('about')"
-                  >About Me,</a
-                >
-              </li>
-              <li class="nav-item">
-                <a
-                  class="nav-link hoverable"
-                  href="javascript:void(0)"
-                  style="color: #fff"
-                  onclick="showContent('career')"
-                  >Work Experience,</a
-                >
-              </li>
-              <li class="nav-item">
-                <a
-                  class="nav-link hoverable"
-                  href="javascript:void(0)"
-                  style="color: #fff"
-                  onclick="showContent('skills')"
-                  >Skills,</a
-                >
-              </li>
-              <li class="nav-item">
-                <a
-                  class="nav-link hoverable"
-                  href="javascript:void(0)"
-                  style="color: #fff"
-                  onclick="showContent('projects')"
-                  >Projects,</a
-                >
-              </li>
-              <li class="nav-item">
-                <a
-                  class="nav-link hoverable"
-                  href="javascript:void(0)"
-                  style="color: #fff"
-                  onclick="showContent('contact')"
-                  >Contact</a
-                >
-              </li>
-              <li class="nav-item">] ,</li>
-            </ul>
-          </div>
-        </div>
+<body>
+    <canvas id="neuronCanvas" style="position: fixed; top: 0; left: 0; z-index: -1;"></canvas>
 
-        <!-- Main Content -->
-        <div class="col-md-8">
-          <div class="main-content">
-            <div
-              class="about content-section active-content"
-              id="about-content"
-            >
-              <div class="row align-items-center justify-content-center">
-                <div class="col-md-4 text-center">
-                  <img
-                    src="assets/images/profile.png"
-                    alt=""
-                    style="border-radius: 50%; width: 100%"
-                  />
-                </div>
+    <div class="container">
+        <!-- Home Section: Short Info & Prompt -->
+        <!-- Home Section Container -->
+        <div id="homeSection" class="glass" style="position: relative;">
+
+                <!-- Top Left Location & Time Display -->
+    <div id="locationTimeDisplay"
+    style="position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(255, 255, 255, 0.2); color: white; padding: 8px 16px; border-radius: 8px; font-weight: 500; backdrop-filter: blur(10px); letter-spacing: 1px; font-size: 14px;">
+    🌐 Detecting...
+</div>
+            <!-- Top Right CV Download Button -->
+            <a href="assets/cv/KawsarAhmadCV.pdf" download
+                style="position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(255, 255, 255, 0.2); color: white; padding: 8px 16px; border-radius: 8px; border: none; text-decoration: none; font-weight: 500; backdrop-filter: blur(10px); letter-spacing: 1.2px; display: flex; align-items: center; gap: 8px;">
+
+                <!-- Download SVG Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="18" viewBox="0 0 24 24" width="18"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                </svg>
+
+                Download CV
+            </a>
+
+            <div class="row justify-content-center align-items-center text-center">
                 <div class="col-md-8">
-                  <h2>I'm <span>Kawsar Ahmad</span></h2>
-                  <br />
-                  <p>
-                    Experienced Software developer with a strong background in
-                    crafting innovative solutions. Proven track record in
-                    delivering high-quality software for diverse projects. I
-                    Play With Laravel & Vue.js and Machine Learning
-                  </p>
-                  <br />
-                  <div>
-                    <a href="https://github.com/KawsarAhmad43" target="_blank">
-                      <i class="fa fa-github"></i> GitHub
-                    </a>
-                    |
-                    <a
-                      href="https://www.linkedin.com/in/md-kawsar-ahmad-77800a105/"
-                      target="_blank"
-                    >
-                      <i class="fa fa-linkedin"></i> LinkedIn
-                    </a>
-                    |
-                    <a
-                      href="https://www.kaggle.com/kawsarahmad"
-                      target="_blank"
-                    >
-                      <i class="fa fa-kaggle"></i> Kaggle
-                    </a>
-                    |
-                    <a href="assets/cv/cv.pdf" target="_blank">
-                      <i class="fa fa-download"></i> Download CV
-                    </a>
-                  </div>
+                    <img src="assets/img/profile.jpg" alt="Profile Image" class="profile-img mb-3"
+                        style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;" />
+                    <h1 style="margin-bottom: 10px;">Md Kawsar Ahmad</h1>
+                    <p style="margin: 0;">Software Engineer | Researcher | AI Enthusiast</p>
                 </div>
-              </div>
             </div>
 
-            <div class="career content-section" id="career-content">
-              <div class="row">
-                <div class="col-md-12">
-                  <h2 class="text-primary">Work Experience</h2>
-                  <br />
-                  <!-- Career 1 -->
-                  <div class="career-item">
-                    <h3>Junior Software Engineer</h3>
-                    <h5>Nogor Solution Ltd. | September 2022 - Present</h5>
-                    <p>
-                      My Journey With Nogor Solution is really Wonderfull Where
-                      i have worked with 8 different types of Projects Including
-                      Government and Confedential Projects. During this Journey,
-                      I've developed myself in the Path of Software Engineering.
-                      This Office Provided me Professional Machine Learning
-                      Training.
-                    </p>
-                  </div>
+            <div class="mt-4" style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="promptInput" class="form-control prompt-input"
+                    placeholder="Type your prompt here..."
+                    style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); color: white;" />
 
-                  <!-- Career 2 -->
-                  <div class="career-item">
-                    <h3>Web Developer</h3>
-                    <h5>Onix Computers System | July 2021 - September 2022</h5>
-                    <p>
-                      During My Journey With Onix Computers System I begun my
-                      Journey in the Pathway of Development. In my this Journey
-                      I worked on their Large Scale E-Commerce Web Application
-                      built in Laravel Framework.
-                    </p>
-                  </div>
-                </div>
-              </div>
+                <button id="enterPrompt" class="btn btn-primary btn-custom"
+                    style="padding: 10px 20px; border-radius: 10px; background: rgba(255, 255, 255, 0.2); border: none; color: white; backdrop-filter: blur(10px); margin-top: 0px; letter-spacing: 1.5px;">
+                    Enter
+                </button>
             </div>
 
-            <div class="skills content-section" id="skills-content">
-              <div class="container">
-                <div class="row">
-                  <div class="col-md-12">
-                    <h2 class="text-primary">Skills</h2>
-                    <p>
-                      As a seasoned software developer, I bring a comprehensive
-                      skill set covering both backend and frontend development,
-                      along with expertise in API communication. My technical
-                      proficiency includes:
-                    </p>
-                    <div class="skills-list">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <ul>
-                            <li>
-                              <strong>Expertise:</strong> Laravel, Vue, Rest
-                              API, Livewire, Vite, Vuex
-                            </li>
-                            <br />
-                            <li>
-                              <strong>Backend Development:</strong> PHP, Laravel
-                            </li>
-                            <br />
-                            <li><strong>Database:</strong> FireBase, MySQL</li>
-                            <br />
-                            <li>
-                              <strong>Frontend Development:</strong> JavaScript,
-                              Vue.js, Livewire, Inertia, Vite
-                            </li>
-                            <br />
-                            <li><strong>Testing:</strong> PHPUnit</li>
-                          </ul>
-                        </div>
-                        <div class="col-md-6">
-                          <ul>
-                            <li>
-                              <strong>Operating Systems:</strong> CentOS,
-                              Windows
-                            </li>
-                            <br />
-                            <li>
-                              <strong>Version Control:</strong> Git, GitHub
-                            </li>
-                            <br />
-                            <li>
-                              <strong>Development Tools:</strong> VSCode,
-                              Postman, Git, GitHub, Docker, Composer, npm
-                            </li>
-                            <br />
-                            <li>
-                              <strong>Additional Skills:</strong> Machine
-                              Learning, Java, Pixel Art Using Aesprite
-                            </li>
-                            <li>
-                              <strong>Software Design Pattern:</strong> MVC
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                    <p>
-                      With a keen eye for detail and a commitment to staying
-                      updated with the latest industry trends, I leverage these
-                      skills to deliver high-quality and cutting-edge solutions
-                      for diverse projects.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+            <!-- Instruction text below input -->
             <div
-              class="projects content-section"
-              id="projects-content"
-              style="overflow-y: auto; height: 100vh"
-            >
-              <div class="container">
-                <div class="row">
-                  <div class="col-md-12">
-                    <h2 class="text-primary">Projects</h2>
-                    <br />
-
-                    <!-- Project: MotoBuddy (Backend) -->
-                    <div class="project-item">
-                      <h3>MotoBuddy (Backend)</h3>
-                      <p>
-                        <strong>Type:</strong> API Endpoint Development, Module
-                        Development, Code Testing and Quality Assurance
-                      </p>
-                      <p>
-                        <strong>Description:</strong> Spearheaded the design and
-                        implementation of crucial API endpoints, enabling smooth
-                        communication between the frontend and backend
-                        components.
-                      </p>
-                      <a
-                        href="https://github.com/KawsarAhmad43/moto-buddy-backend"
-                        target="_blank"
-                        >Source</a
-                      >
-                    </div>
-
-                    <!-- Project: Lips -->
-                    <div class="project-item">
-                      <h3>Lips</h3>
-                      <p><strong>Type:</strong> Web Development</p>
-                      <p>
-                        <strong>Description:</strong> Made of raw PHP, HTML,
-                        CSS, and JavaScript, developed for an American
-                        Organization.
-                      </p>
-                      <a href="https://lips.group/" target="_blank">Source</a>
-                    </div>
-
-                    <!-- Project: MRProperty Bazar -->
-                    <div class="project-item">
-                      <h3>MRProperty Bazar</h3>
-                      <p>
-                        <strong>Type:</strong> Real Estate Management System
-                      </p>
-                      <p>
-                        <strong>Description:</strong> Mr. property bazar is a
-                        Web Application made with Laravel, html, CSS, Bootstrap,
-                        Sass
-                      </p>
-                      <a href="https://mrpropertybazar.com/" target="_blank"
-                        >Source</a
-                      >
-                    </div>
-
-                    <!-- Project: Onix Computers System (Laravel Version) -->
-                    <div class="project-item">
-                      <h3>Onix Computers System (Laravel Version)</h3>
-                      <p><strong>Type:</strong> E-commerce</p>
-                      <p>
-                        <strong>Description:</strong> Onix Computers System is
-                        an E-commerce app made with Laravel, html, CSS,
-                        Bootstrap
-                      </p>
-                      <a href="https://www.onixbd.com/" target="_blank"
-                        >Source</a
-                      >
-                    </div>
-
-                    <!-- Project: Onix Computers System (Laravel Version) -->
-                    <div class="project-item">
-                      <h3>USA-HQ-Wireless (Laravel Version)</h3>
-                      <p><strong>Type:</strong> E-commerce</p>
-                      <p>
-                        <strong>Description:</strong> USA-HQ-Wireless is an
-                        E-commerce app made with Laravel, html, CSS, Bootstrap
-                      </p>
-                      <a
-                        href="https://github.com/KawsarAhmad43/USA-HQ-Wireless"
-                        target="_blank"
-                        >Source</a
-                      >
-                    </div>
-
-                    <!-- Project: Memory Maven -->
-                    <div class="project-item">
-                      <h3>Memory Maven</h3>
-                      <p><strong>Type:</strong> Game</p>
-                      <p>
-                        <strong>Description:</strong> Memory-Maven is a Game
-                        made with Vue.js and html, css, and bootstrap
-                      </p>
-                      <a
-                        href="https://github.com/KawsarAhmad43/Memory-Maven"
-                        target="_blank"
-                        >Source</a
-                      >
-                    </div>
-                  </div>
-                </div>
-              </div>
+                style="margin-top: 8px; color: rgba(255, 255, 255, 0.85); font-size: 14px; font-family: 'Segoe UI', sans-serif;">
+                Simply type here
+                <span style="color: #00aaff; font-weight: bold;">"projects"</span> or
+                <span style="color: #00aaff; font-weight: bold;">"Show me your projects"</span>
             </div>
 
-            <div
-              class="contact content-section"
-              id="contact-content"
-              style="padding: 20px; background-color: #f8f9fa"
-            >
-              <div class="container">
-                <div class="row">
-                  <div class="col-md-12 text-center">
-                    <h2 class="text-primary">Contact Me</h2>
-                    <br />
-
-                    <!-- Github Icon -->
-                    <a
-                      href="https://github.com/KawsarAhmad43"
-                      target="_blank"
-                      class="contact-icons"
-                    >
-                      <i class="fa fa-github" style="font-size: 2em"></i>
-                      <p>Github</p>
-                    </a>
-
-                    <!-- Google Icon -->
-                    <a href="mailto:ahmad43.bu@gmail.com" class="contact-icons">
-                      <i class="fa fa-google" style="font-size: 2em"></i>
-                      <p>Email</p>
-                    </a>
-
-                    <!-- Linkedin Icon -->
-                    <a
-                      href="linkedin.com/in/md-kawsar-ahmad-77800a105/"
-                      target="_blank"
-                      class="contact-icons"
-                    >
-                      <i
-                        class="fa fa-linkedin-square"
-                        style="font-size: 2em"
-                      ></i>
-                      <p>Linkedin</p>
-                    </a>
-                  </div>
-                </div>
-              </div>
+            <div>
+                <button id="showPrompts" class="btn btn-secondary btn-custom" style="letter-spacing: 1.5px;">Available
+                    Prompts</button>
             </div>
-          </div>
+
+            <!-- Hidden Available Prompts List -->
+            <div id="availablePrompts" class="hidden">
+                <ul>
+                    <li class="prompt-item" data-prompt="projects">Projects</li>
+                    <li class="prompt-item" data-prompt="profile">Profile</li>
+                    <li class="prompt-item" data-prompt="skills">Skills</li>
+                    <li class="prompt-item" data-prompt="work">Work Experience</li>
+                    <li class="prompt-item" data-prompt="certifications">Certifications</li>
+                    <li class="prompt-item" data-prompt="researchworks">Research Works</li>
+                    <li class="prompt-item" data-prompt="contact">Contact</li>
+                </ul>
+            </div>
+
+            <!-- Loader for redirection -->
+            <div id="loader" class="mt-4 hidden">
+                <div class="loader"></div>
+                <p class="text-center mt-2">Redirecting...</p>
+            </div>
+
         </div>
-      </div>
+
+
+        <!-- Additional Sections (initially hidden) -->
+        <div id="projectsSection" class="glass hidden">
+            <h2>Projects</h2>
+            <p>Projects content goes here...</p>
+        </div>
+
+        <div id="profileSection" class="glass hidden">
+            <h2>Profile</h2>
+            <p>Profile details...</p>
+        </div>
+
+        <div id="skillsSection" class="glass hidden">
+            <h2>Skills</h2>
+            <p>Skills details...</p>
+        </div>
+
+        <div id="workSection" class="glass hidden">
+            <h2>Work Experience</h2>
+            <p>Work experience details...</p>
+        </div>
+
+        <div id="certificationsSection" class="glass hidden">
+            <h2>Certifications</h2>
+            <p>Certifications details...</p>
+        </div>
+
+        <div id="researchworksSection" class="glass hidden">
+            <h2>Research Works</h2>
+            <p>Research works details...</p>
+        </div>
+
+        <div id="contactSection" class="glass hidden">
+            <h2>Contact</h2>
+            <p>Contact details...</p>
+        </div>
     </div>
 
-    <!-- Bootstrap JS and Popper.js -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- Back to Prompt Button -->
+    <button id="backButton" class="btn btn-warning btn-custom hidden">Back to Prompt</button>
+
+    <!-- neuron -->
+    <script src="assets/js/neuron.js"></script>
+    <!-- timeandlocation -->
+    <script src="assets/js/time.js"></script>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- JavaScript for prompt handling and animations -->
     <script src="assets/js/script.js"></script>
-  </body>
+</body>
+
 </html>
