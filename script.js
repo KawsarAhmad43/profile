@@ -1,7 +1,7 @@
 // AI Portfolio Interactive Script
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializePortfolio();
     updateLocationAndTime();
     createParticles();
@@ -17,13 +17,13 @@ function initializePortfolio() {
     const chatInput = document.getElementById('chatInput');
 
     // Profile circle click event
-    profileCircle.addEventListener('click', function() {
+    profileCircle.addEventListener('click', function () {
         playAIVoice();
     });
 
     // Tab navigation
     tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const section = this.getAttribute('data-section');
             navigateToSection(section, this);
         });
@@ -31,7 +31,7 @@ function initializePortfolio() {
 
     // Chat functionality
     chatSend.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', function(e) {
+    chatInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             sendMessage();
         }
@@ -116,10 +116,22 @@ function sendMessage() {
 // Smart Chat Helpers
 // ============================================
 
-// Collect all skills from the DOM
+// Collect all skills from the DOM and project data
 function getAllSkills() {
     const skillTags = document.querySelectorAll('.skill-tag');
-    return Array.from(skillTags).map(tag => tag.textContent.trim());
+    const domSkills = Array.from(skillTags).map(tag => tag.textContent.trim());
+
+    // Add skills from project technologies to ensure everything mentioned in projects is found
+    const projectSkills = [];
+    for (const project of Object.values(projectData)) {
+        if (project.technologies) {
+            projectSkills.push(...project.technologies);
+        }
+    }
+
+    // Return unique case-insensitive unique skills
+    const allSkills = [...domSkills, ...projectSkills];
+    return [...new Set(allSkills)];
 }
 
 // Collect all achievements from the DOM
@@ -129,8 +141,8 @@ function getAllAchievements() {
         const title = item.querySelector('h4')?.textContent.trim() || '';
         const orgElement = item.querySelector('.achievement-org');
         const org = orgElement?.textContent.trim() || '';
-        return { 
-            title, 
+        return {
+            title,
             description: org || 'Professional Achievement'
         };
     });
@@ -202,7 +214,7 @@ function generateAIResponse(message) {
     }
 
     // ===== SPECIFIC PROJECT FILTER =====
-    // Patterns: "projects on Vue", "Vue projects", "show me Vue.js projects"
+    // Patterns: "projects on Vue", "Vue projects", "show me Vue.js projects", "AWS", "web3"
     const projectFilterPatterns = [
         /projects?\s+(?:on|with|using|in|about|related to|for)\s+(.+?)[\?\.\!]?\s*$/,
         /(?:show|list|find|get|display)\s+(?:me\s+)?(?:your\s+)?projects?\s+(?:on|with|using|in|about|for)\s+(.+?)[\?\.\!]?\s*$/,
@@ -210,15 +222,41 @@ function generateAIResponse(message) {
         /^(.+?)\s+projects?[\?\.\!]?\s*$/,
     ];
 
+    let queryTerm = null;
+
+    // Check patterns first
     for (const pattern of projectFilterPatterns) {
         const match = lowerMessage.match(pattern);
         if (match) {
-            const queryTerm = match[1].trim().replace(/[?.!,]/g, '').trim();
-            if (queryTerm.length < 2) continue;
-            // Skip generic terms
-            const genericTerms = ['your', 'the', 'all', 'some', 'any', 'my', 'his', 'her', 'show', 'me', 'what', 'about', 'those', 'these'];
-            if (genericTerms.includes(queryTerm)) break;
+            queryTerm = match[1].trim().replace(/[?.!,]/g, '').trim();
+            break;
+        }
+    }
 
+    // Special case: If user just types a technology name (like "AWS" or "web3.js") 
+    // and it matches a known technology in projects, treat it as a project search
+    if (!queryTerm) {
+        const words = lowerMessage.split(/\s+/);
+        if (words.length <= 3) { // Only for short messages to avoid false positives
+            const allTechs = [];
+            Object.values(projectData).forEach(p => allTechs.push(...p.technologies));
+            const uniqueTechs = [...new Set(allTechs.map(t => t.toLowerCase()))];
+
+            for (const word of words) {
+                const cleanWord = word.replace(/[?.!,]/g, '');
+                if (cleanWord.length < 2) continue;
+                if (uniqueTechs.some(tech => tech.includes(cleanWord) || cleanWord.includes(tech))) {
+                    queryTerm = cleanWord;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (queryTerm && queryTerm.length >= 2) {
+        // Skip generic terms
+        const genericTerms = ['your', 'the', 'all', 'some', 'any', 'my', 'his', 'her', 'show', 'me', 'what', 'about', 'those', 'these'];
+        if (!genericTerms.includes(queryTerm)) {
             const matchingProjects = searchProjectsByKeyword(queryTerm);
             if (matchingProjects.length > 0) {
                 let response = `Found <strong>${matchingProjects.length}</strong> project(s) related to <strong>${queryTerm}</strong>:<div class="chat-projects-list">`;
@@ -227,8 +265,6 @@ function generateAIResponse(message) {
                 });
                 response += '</div><small style="opacity:0.6;">Click on any project to see full details.</small>';
                 return response;
-            } else {
-                return `I don't have any projects specifically related to <strong>${queryTerm}</strong> in my portfolio. Explore my Projects section to see all my work!`;
             }
         }
     }
@@ -239,7 +275,7 @@ function generateAIResponse(message) {
         if (achievements.length > 0) {
             let certificationCount = 0;
             let awardCount = 0;
-            
+
             // Count certifications vs awards by analyzing titles
             achievements.forEach(a => {
                 if (a.title.toLowerCase().includes('runner') || a.title.toLowerCase().includes('it olympiad')) {
@@ -248,20 +284,20 @@ function generateAIResponse(message) {
                     certificationCount++;
                 }
             });
-            
+
             const certificateList = achievements.filter(a => !a.title.toLowerCase().includes('runner') && !a.title.toLowerCase().includes('it olympiad')).slice(0, 4).map(a => `<li class="cert-item"><strong>${a.title}</strong><br><small>${a.description}</small></li>`).join('');
             const awardList = achievements.filter(a => a.title.toLowerCase().includes('runner') || a.title.toLowerCase().includes('it olympiad')).map(a => `<li class="award-item"><strong>${a.title}</strong><br><small>${a.description}</small></li>`).join('');
-            
+
             let response = `<span class="chat-achievement-highlight"><i class="fas fa-trophy"></i> My Certifications & Awards:</span>`;
-            
+
             if (certificateList) {
                 response += `<div class="chat-certs"><strong style="color: var(--primary-color);">📜 Certifications (${certificationCount})</strong><ul class="chat-achievements-list">${certificateList}</ul></div>`;
             }
-            
+
             if (awardList) {
                 response += `<div class="chat-awards"><strong style="color: #ffd700;">🏆 Awards</strong><ul class="chat-achievements-list">${awardList}</ul></div>`;
             }
-            
+
             response += `<small style="opacity:0.7;">Visit my Achievements section to see my complete credentials!</small>`;
             return response;
         } else {
@@ -405,17 +441,17 @@ function playAIVoice() {
         utterance.volume = 1;
 
         // Start animation only when speech actually starts
-        utterance.onstart = function() {
+        utterance.onstart = function () {
             voiceIndicator.classList.add('active');
             startVoiceAnimation();
         };
 
-        utterance.onend = function() {
+        utterance.onend = function () {
             voiceIndicator.classList.remove('active');
             stopVoiceAnimation();
         };
 
-        utterance.onerror = function(event) {
+        utterance.onerror = function (event) {
             console.error('Speech synthesis error:', event);
             voiceIndicator.classList.remove('active');
             stopVoiceAnimation();
@@ -522,7 +558,7 @@ function createParticles() {
 }
 
 // CV Download
-document.getElementById('cvDownload').addEventListener('click', function(e) {
+document.getElementById('cvDownload').addEventListener('click', function (e) {
     e.preventDefault();
 
     // Optional: Alert message before download
@@ -552,7 +588,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // Add liquid glass effect on mouse move
-document.addEventListener('mousemove', function(e) {
+document.addEventListener('mousemove', function (e) {
     const cards = document.querySelectorAll('.glass-card');
 
     cards.forEach(card => {
@@ -603,7 +639,7 @@ const observerOptions = {
     rootMargin: '0px 0px -50px 0px'
 };
 
-const observer = new IntersectionObserver(function(entries) {
+const observer = new IntersectionObserver(function (entries) {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             entry.target.style.opacity = '1';
@@ -618,7 +654,7 @@ document.querySelectorAll('.content-section').forEach(section => {
 });
 
 // Add parallax effect to profile circle
-window.addEventListener('scroll', function() {
+window.addEventListener('scroll', function () {
     const scrolled = window.pageYOffset;
     const profileCircle = document.getElementById('profileCircle');
 
@@ -628,7 +664,7 @@ window.addEventListener('scroll', function() {
 });
 
 // Prevent context menu on profile image (optional)
-document.getElementById('profileImage').addEventListener('contextmenu', function(e) {
+document.getElementById('profileImage').addEventListener('contextmenu', function (e) {
     e.preventDefault();
 });
 
@@ -646,7 +682,7 @@ function initializeSkillsTabs() {
     const roleContents = document.querySelectorAll('.role-content');
 
     roleTabButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const role = this.getAttribute('data-role');
 
             // Remove active class from all role tabs
@@ -664,7 +700,7 @@ function initializeSkillsTabs() {
     const subContents = document.querySelectorAll('.sub-content');
 
     subTabButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const subtab = this.getAttribute('data-subtab');
 
             // Remove active class from all sub-tabs
@@ -764,7 +800,7 @@ function initializeExperienceModal() {
     const modalClose = modal.querySelector('.modal-close');
 
     experienceItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function () {
             const expId = this.getAttribute('data-experience');
             showExperienceModal(expId);
         });
@@ -818,219 +854,320 @@ function showExperienceModal(expId) {
 
 // Updated projectData in script.js
 const projectData = {
-    fs1: {
+    "fs1": {
         title: "Housebrand AI",
         icon: "fas fa-couch",
-        description: "HouseBrands is a premium furniture marketplace platform connecting designers, manufacturers, and high-end clients in a curated digital ecosystem. The platform provides advanced modules for product management, project workflows, order handling, marketing automation, event management, and content publishing while ensuring secure access through role-based permissions.",
+        description: "Premium furniture marketplace connecting designers, manufacturers, and high-end clients. The platform provides advanced modules for product management, project workflows, order handling, marketing automation, event management, and content publishing while ensuring secure access through role-based permissions.",
         features: [
-            "Project management with dashboards, task tracking, proposals, invoices, and document management",
+            "Project management with dashboards, task tracking, proposals, and invoices",
             "Designer portfolio and inspiration gallery modules",
-            "Event management system with listings and centralized calendar",
-            "Marketing module for email campaigns, scheduling, segmentation, and tracking",
-            "Priority-based notice management",
+            "Event management system with centralized calendar",
+            "Marketing module for campaigns and tracking",
             "Dynamic role-based access control (RBAC)"
         ],
-        technologies: ["Laravel", "Vue.js", "Blade Templates", "TailwindCSS", "MySQL", "Redis", "Docker", "GitHub Actions", "Postman", "Jira"],
+        technologies: ["Laravel", "REST API", "Vue.js", "MySQL", "Domain Driven Design"],
         projectLink: "https://housebrands.com/",
-        githubLink: "#"  // No GitHub provided
+        githubLink: "#"
     },
-    fs2: {
+    "fs2": {
         title: "Hotelinking",
         icon: "fas fa-hotel",
-        description: "Hotelinking is a global hotel management hub providing a unified solution for hotel groups to centralize guest data collection, ensure network resilience, and digitize front desk operations securely and scalably.",
+        description: "Global hotel management hub providing a unified solution for hotel groups to centralize guest data collection, ensure network resilience, and digitize front desk operations securely and scalably.",
         features: [
             "AWS infrastructure management and optimization",
-            "Multiple integration implementations",
-            "Real-time problem solving and scalable infrastructure solutions",
-            "Issue navigation and resolution across AWS and local environments",
+            "Centralized guest data collection",
+            "Digitized front desk operations",
+            "Real-time problem solving and scalable infrastructure",
             "Safe builds with unit and feature testing"
         ],
-        technologies: ["Laravel", "Vue.js", "Blade Templates", "TailwindCSS", "MySQL", "Redis", "Docker", "AWS", "GitHub Actions", "Postman", "Jira"],
+        technologies: ["Amplify Gen 2", "Laravel", "REST API", "GraphQL", "DynamoDB", "Astro", "Vue.js", "Nanostores", "AWS"],
         projectLink: "https://www.hotelinking.com/en/",
-        githubLink: "#"  // No GitHub provided
+        githubLink: "#"
     },
-    fs3: {
+    "fs3": {
         title: "Linktiva",
         icon: "fas fa-plug",
-        description: "AI-powered Chrome extension (formerly Bulk.ly) enabling social post automation across Buffer, Hootsuite, and direct social accounts with advanced content generation and subscription management.",
+        description: "AI-powered Chrome extension for social post automation and content generation, enabling social post automation across various platforms.",
         features: [
-            "Backend APIs for React-based Chrome extension",
-            "Automation module with Laravel job queues",
-            "OpenAI integration for contextual text generation",
-            "Prompt management, templates, RBAC, and admin dashboard",
-            "Stripe subscription system with team plans and free trial",
-            "Google Sheets/Docs API integration",
-            "License control, usage tracking, and analytics"
+            "Backend APIs for Chrome extension",
+            "Automation module with job queues",
+            "OpenAI integration for text generation",
+            "Prompt management and admin dashboard",
+            "Stripe subscription system"
         ],
-        technologies: ["Laravel", "Livewire", "Blade Templates", "TailwindCSS", "MySQL", "Redis", "Docker", "Stripe API", "Google APIs", "OpenAI API", "GitHub Actions"],
+        technologies: ["Laravel", "Livewire", "OpenAI", "Google Clients", "MySQL", "Automated Tool"],
         projectLink: "https://linktiva.com/",
-        githubLink: "#"  // No GitHub provided
+        githubLink: "#"
     },
-    fs4: {
-        title: "BN Ration & Clothing System",
+    "fs4": {
+        title: "Bangladesh Navy Ration & Clothing System",
         icon: "fas fa-ship",
-        description: "Large-scale distributed management system for Bangladesh Navy handling ration distribution, clothing inventory, and supply chain operations with emphasis on confidentiality and efficiency.",
+        description: "Large-scale distributed management system for Bangladesh Navy handling resource management, ration distribution, and clothing inventory with high security.",
         features: [
-            "Backend APIs supporting Vue.js frontend",
-            "Advanced inventory, allocation, and reporting features",
-            "Workflow automation and data consistency improvements",
-            "Clean code maintenance with documentation and testing",
-            "Ongoing support and performance optimization"
+            "Advanced inventory and allocation features",
+            "Distributed system architecture",
+            "Local sync capabilities",
+            "Network orchestration",
+            "Domain Driven Design implementation"
         ],
-        technologies: ["Laravel", "Vue.js", "Blade Templates", "MySQL", "Docker", "Linux Servers", "Git", "Jira", "Postman"],
+        technologies: ["Laravel", "REST API", "Local Sync", "Distributed System", "Vue.js", "Network Orchestration", "MySQL", "Domain Driven Design"],
         projectLink: "#",
-        githubLink: "#"  // Confidential project
+        githubLink: "#"
     },
-    fs5: {
+    "fs5": {
         title: "FBCCI Panel System",
         icon: "fas fa-building",
-        description: "Comprehensive web platform managing all operations of the Federation of Bangladesh Chambers of Commerce & Industry, including panel management and organizational workflows.",
+        description: "Comprehensive management platform for Federation of Bangladesh Chambers of Commerce & Industry (FBCCI), handling panel management and organizational workflows.",
         features: [
-            "Multiple modules for organizational management",
-            "Panel management and administrative role features",
-            "Backend API and frontend integration",
-            "Scalable solution design and code quality maintenance",
-            "Agile collaboration with Jira and CI/CD"
+            "Organizational management modules",
+            "Panel management system",
+            "Administrative role features",
+            "REST API integration with Vue.js",
+            "Scalable solution design"
         ],
-        technologies: ["Laravel", "Vue.js", "Blade Templates", "MySQL", "Docker", "CentOS Servers", "Git", "Jira", "Postman"],
+        technologies: ["Laravel", "RSET API", "Vue.js", "MySQL"],
         projectLink: "#",
-        githubLink: "#"  // No public link
+        githubLink: "#"
     },
-    ml1: {
-        title: "FirstStep AI Assistant (Edge Computing)",
-        icon: "fas fa-microchip",
-        description: "Scaled-up, high-performance version of FirstStep AI RAG system optimized for edge devices, supporting thousands of concurrent users with minimal latency through multi-threaded inference batching.",
+    "fs6": {
+        title: "Cantonment English School & College",
+        icon: "fas fa-school",
+        description: "Highly Scaled School management System for Defence type education organization, providing a comprehensive digital solution for institutional management.",
         features: [
-            "Multi-threading and inference batching for parallel requests",
-            "Deployment on NVIDIA Jetson devices",
-            "TensorRT-LLM and Llama.cpp acceleration",
-            "Dynamic edge orchestration and resource allocation",
-            "Dramatic reduction in response times",
+            "Student and faculty management",
+            "Cloudflare orchestration for high availability",
+            "Automated administrative workflows",
+            "Result and attendance management",
+            "Communication modules"
+        ],
+        technologies: ["Laravel", "RSET API", "Vue.js", "Cloudflare Orchestration", "MySQL"],
+        projectLink: "#",
+        githubLink: "#"
+    },
+    "fs7": {
+        title: "Bangladesh Export Processing Zones Authority (BEPZA)",
+        icon: "fas fa-home-user",
+        description: "The pioneer investment promotion agency of Bangladesh, providing digital services to facilitate investments and operational management.",
+        features: [
+            "Investment facilitation modules",
+            "Administrative workflow automation",
+            "Secure data management for investors",
+            "Integration with national systems",
+            "Operational reporting and analytics"
+        ],
+        technologies: ["Laravel", "RSET API", "Vue.js", "MySQL"],
+        projectLink: "https://bepza.gov.bd/",
+        githubLink: "#"
+    },
+    "fs8": {
+        title: "Bangladesh Energy Society",
+        icon: "fas fa-thunderstorm",
+        description: "Optimal organization hub for Bangladesh energy society, facilitating communication and organizational processes.",
+        features: [
+            "Member management system",
+            "Event and publication tracking",
+            "Administrative dashboard",
+            "Secure payment integrations",
+            "Collaborative portal for researchers"
+        ],
+        technologies: ["Laravel", "RSET API", "Vue.js", "MySQL"],
+        projectLink: "https://bangladeshenergysociety.org/",
+        githubLink: "#"
+    },
+    "fs9": {
+        title: "Shopex",
+        icon: "fas fa-shop",
+        description: "AI Powered Agentic multi-vendor e-commerce Web application with advanced automation and intelligence.",
+        features: [
+            "Agentic AI for commerce automation",
+            "Multi-vendor architecture",
+            "OpenAI and Ollama integration",
+            "LangChain PHP bindings for orchestration",
+            "Seamless shopping experience with RAG"
+        ],
+        technologies: ["Laravel", "RSET API", "Vue.js", "OpenAI SDK", "Ollama", "Langchain php bindings", "MySQL"],
+        projectLink: "#",
+        githubLink: "#"
+    },
+    "fs10": {
+        title: "PharmaHub",
+        icon: "fas fa-laptop-medical",
+        description: "Multi vendor Pharmacy management hub that handles automated supply chain management flow from manufacturers to consumers.",
+        features: [
+            "SaaS based multi-tenant architecture",
+            "Automated supply chain management",
+            "Inventory and expiration tracking",
+            "Multi-vendor orchestration",
+            "Real-time analytics for pharmacies"
+        ],
+        technologies: ["Laravel", "RSET API", "Vue.js", "SaaS", "Multi Tenant", "MySQL"],
+        projectLink: "#",
+        githubLink: "#"
+    },
+    "fs11": {
+        title: "EX3 Hub",
+        icon: "fas fa-money-bill-wave",
+        description: "Crypto currency trading hub enabling secure and real-time trading of digital assets.",
+        features: [
+            "Web3 and Ethereum integration",
+            "Real-time price tracking via WebSockets",
+            "Secure wallet management",
+            "Solidity based smart contracts",
+            "Trading dashboard with live updates"
+        ],
+        technologies: ["Laravel", "RSET API", "web3.js", "Solidity", "Ethereum", "Socket.io", "WebSocket", "WebRTC", "Vue.js", "SaaS", "Multi Tenant", "MySQL"],
+        projectLink: "#",
+        githubLink: "#"
+    },
+    "fs12": {
+        title: "Cvtron",
+        icon: "fas fa-user-tie",
+        description: "ATS Friendly AI Powered Resume Builder with multi profile management for job seekers.",
+        features: [
+            "AI-powered content generation for resumes",
+            "ATS scoring and optimization",
+            "Multi-profile management",
+            "React.js based interactive UI",
+            "SaaS multi-tenant architecture"
+        ],
+        technologies: ["Laravel", "RSET API", "React.js", "SaaS", "Typescript", "Multi Tenant", "MySQL"],
+        projectLink: "#",
+        githubLink: "#"
+    },
+    "ml1": {
+        title: "FirstStep AI Assistant",
+        icon: "fas fa-microchip",
+        description: "High-performance Offline edge-optimized RAG system with inference batching, designed for low-latency AI responses on edge devices.",
+        features: [
+            "Offline edge-optimized RAG system",
+            "Multi-threaded inference batching",
+            "TensorRT-LLM and CUDA acceleration",
+            "Deployment on NVIDIA Jetson Orin Xavier",
             "High availability and fault tolerance"
         ],
-        technologies: ["FastAPI", "Uvicorn", "TensorRT-LLM", "Llama.cpp", "LangChain", "LangGraph", "FAISS", "ChromaDB", "CUDA", "NVIDIA Jetson"],
+        technologies: ["FastAPI", "TensorRT-LLM", "LangChain", "Ollama", "RAG Orchestration", "Batch Inference", "CUDA Optimization", "Edge Computing", "Jetson Orin", "Jetson Orin Xavier"],
         projectLink: "#",
         githubLink: "#"
     },
-    ml2: {
-        title: "FirstStep AI",
-        icon: "fas fa-book",
-        description: "Large-scale offline LLM RAG system enabling enterprises to train custom LLMs on internal knowledge, reducing costs and providing decision support through AI interaction.",
+    "ml2": {
+        title: "AI Sales Assistant- Real estate",
+        icon: "fas fa-microchip",
+        description: "Highly optimized RAG sysetm for real state management system, facilitating intelligent property search and queries.",
         features: [
-            "Complete RAG pipeline (ingestion to generation)",
-            "LLM fine-tuning for industry-specific accuracy",
-            "LangChain/LangGraph orchestration",
-            "FAISS/ChromaDB vector stores",
-            "Agentic approach with Ollama",
-            "FastAPI backend and Streamlit UI",
-            "Automated knowledge ingestion and retraining"
+            "Real estate specific RAG pipeline",
+            "FAISS and ChromaDB vector storage",
+            "ConversationalBuffer Memory implementation",
+            "Automated property inquiry handling",
+            "Integration with OpenAI and Ollama"
         ],
-        technologies: ["FastAPI", "Uvicorn", "Ollama", "LangChain", "LangGraph", "FAISS", "ChromaDB", "Streamlit", "Jinja2", "GitHub Actions"],
+        technologies: ["FastAPI", "OpenAI", "LangChain", "FAISS", "ChromaDB", "Ollama", "RAG Orchestration", "ConversationalBuffer Memory"],
         projectLink: "#",
         githubLink: "#"
     },
-    ml3: {
-        title: "AI Chatbot Platform",
+    "ml3": {
+        title: "Carvu AI- Car Insurance forgery solution",
+        icon: "fas fa-microchip",
+        description: "highly optimized AI assistant to Identify fake Car accident issue and predict the cost estimation for the Govt.",
+        features: [
+            "Multimodal Model for image and text",
+            "Forgery detection in accident images",
+            "Cost estimation prediction",
+            "RAG orchestration for insurance policies",
+            "Dockerized deployment system"
+        ],
+        technologies: ["FastAPI", "OpenAI", "Multimodal Model", "LangChain", "Image Recognition", "FAISS", "ChromaDB", "Ollama", "Docker", "RAG Orchestration"],
+        projectLink: "#",
+        githubLink: "#"
+    },
+    "ml4": {
+        title: "Geno AI - AI Coding Agent",
         icon: "fas fa-robot",
-        description: "Intelligent conversational AI platform powered by advanced NLP and machine learning. The chatbot understands context, learns from interactions, and provides human-like responses across multiple domains.",
+        description: "Highly Optimized Agentic system that will search and review and fix coding errors autonomously.",
         features: [
-            "Natural language understanding and processing",
-            "Context-aware conversation management",
-            "Multi-language support",
-            "Intent recognition and entity extraction",
-            "Continuous learning from user interactions",
-            "Integration with multiple messaging platforms",
-            "Analytics dashboard for conversation insights"
+            "Autonomous coding agent pipeline",
+            "LLM as Judge for code verification",
+            "Pydantic AI for structured outputs",
+            "Integration with ChromaDB for RAG",
+            "Automated bug identification and patching"
         ],
-        technologies: ["Python", "TensorFlow", "BERT", "Hugging Face", "FastAPI", "PostgreSQL", "Redis", "Docker"],
-        projectLink: "https://example.com/chatbot",
-        githubLink: "https://github.com/yourusername/chatbot"
+        technologies: ["FastAPI", "Ollama", "OpenAI", "Agentic pipeline", "Pydantic AI", "ChromaDB", "RAGAS", "LLM as Judge"],
+        projectLink: "#",
+        githubLink: "#"
     },
-    ml4: {
-        title: "Image Recognition System",
-        icon: "fas fa-image",
-        description: "Deep learning-based medical image classification system using Convolutional Neural Networks. Achieves 95% accuracy in detecting abnormalities in X-ray and MRI scans, assisting healthcare professionals in diagnosis.",
+    "ml5": {
+        title: "Advanced RAG System",
+        icon: "fas fa-robot",
+        description: "Multifunctional and multi-typed RAG system for Business(Fintech), handling complex queries and multimodal data.",
         features: [
-            "Multi-class image classification",
-            "Transfer learning with pre-trained models",
-            "Real-time image processing and analysis",
-            "Confidence score and visualization",
-            "Batch processing capabilities",
-            "Model versioning and A/B testing",
-            "RESTful API for integration"
+            "Multimodal pipeline integration",
+            "LangGraph for complex agent flows",
+            "Kokoro TTS for audio responses",
+            "Fintech specific knowledge base",
+            "Dockerized scalable deployment"
         ],
-        technologies: ["PyTorch", "CNN", "ResNet", "OpenCV", "FastAPI", "NumPy", "Pandas", "Docker", "CUDA"],
-        projectLink: "https://example.com/image-recognition",
-        githubLink: "https://github.com/yourusername/image-recognition"
+        technologies: ["FastAPI", "Langchain", "LangGraph", "FAISS", "Ollama", "OpenaAI", "Sentence Transformer", "Agentic pipeline", "Multimodal pipeline", "Kokoro TTS model", "Docker", "ChromaDB"],
+        projectLink: "#",
+        githubLink: "#"
     },
-    ml5: {
-        title: "Sentiment Analysis Tool",
-        icon: "fas fa-comments",
-        description: "Real-time sentiment analysis system for social media data using state-of-the-art transformer models. Processes thousands of posts per minute to gauge public opinion and brand sentiment.",
+    "ml6": {
+        title: "Graph RAG System",
+        icon: "fas fa-robot",
+        description: "Advanced Graph RAG system to handle Multihop Queries using knowledge graphs and Neo4j.",
         features: [
-            "Real-time sentiment classification",
-            "Multi-platform data collection (Twitter, Reddit, etc.)",
-            "Emotion detection and categorization",
-            "Trend analysis and visualization",
-            "Custom model fine-tuning",
-            "API for third-party integration",
-            "Historical data analysis"
+            "Multihop query resolution with Graphs",
+            "Neo4j integration for knowledge graph",
+            "NER and Corpus Registry",
+            "Canonical mapping implementation",
+            "LLM as Judge using RAGAS"
         ],
-        technologies: ["BERT", "Hugging Face", "FastAPI", "Python", "Pandas", "MongoDB", "Redis", "Docker"],
-        projectLink: "https://example.com/sentiment",
-        githubLink: "https://github.com/yourusername/sentiment"
+        technologies: ["FastAPI", "Ollama", "OpenAI", "NER", "Corpus Registry", "Neo4j", "Canocial mapping", "ChromaDB", "RAGAS", "LLM as Judge"],
+        projectLink: "#",
+        githubLink: "#"
     },
-    // Research projects remain unchanged
-    res1: {
-        title: "Telemedicine AI System",
+    "res1": {
+        title: "A Secure Telemedicine Scheme based on Distributed database, machine Learning and IoT for diabetes Detection",
         icon: "fas fa-heartbeat",
-        description: "AI-powered telemedicine platform for remote patient monitoring and preliminary diagnosis. Integrates IoT devices, machine learning models, and secure communication channels to provide quality healthcare remotely.",
+        description: "A Secure Telemedicine Scheme based on Distributed database, machine Learning and IoT for diabetes Detection. AI-powered remote patient monitoring and diagnosis.",
         features: [
-            "Real-time vital signs monitoring via IoT devices",
-            "AI-assisted preliminary diagnosis",
-            "Secure video consultation platform",
-            "Electronic health records (EHR) integration",
-            "Medication reminders and tracking",
-            "Emergency alert system",
-            "HIPAA-compliant data handling"
+            "Distributed database for security",
+            "IoT-based health monitoring",
+            "Machine Learning for diagnosis",
+            "Secure telemedicine scheme",
+            "Remote patient interaction"
         ],
-        technologies: ["Deep Learning", "TensorFlow", "IoT", "WebRTC", "Python", "Node.js", "MongoDB", "AWS"],
-        projectLink: "https://example.com/telemedicine",
-        githubLink: "https://github.com/yourusername/telemedicine"
+        technologies: ["Deep Learning", "Distributed database system", "Healthcare", "IoT"],
+        projectLink: "#",
+        githubLink: "#"
     },
-    res2: {
-        title: "Transfer Learning Research",
+    "res2": {
+        title: "Bangla Sentence Classification Using Bangle BERT and XaI",
         icon: "fas fa-brain",
-        description: "Novel approach to deep transfer learning in medical imaging, published in peer-reviewed journal. Demonstrates 15% improvement in accuracy over traditional methods for rare disease detection with limited training data.",
+        description: "Bangla Sentence Classification Using Bangla BERT and XAI. Novel approach to deep transfer learning in Low level language.",
         features: [
-            "Custom transfer learning architecture",
-            "Domain adaptation techniques",
-            "Few-shot learning implementation",
-            "Comprehensive evaluation on multiple datasets",
-            "Reproducible research with open-source code",
-            "Detailed ablation studies",
-            "Comparison with state-of-the-art methods"
+            "Deep Transfer Learning with BERT",
+            "Explainable AI (XaI) implementation",
+            "CNN and BiLSTM ensemble",
+            "Large-scale Bangla dataset processing",
+            "Fine-tuned transformer models"
         ],
-        technologies: ["Transfer Learning", "PyTorch", "CNN", "Medical Imaging", "Python", "Jupyter", "LaTeX"],
-        projectLink: "https://arxiv.org/example",
-        githubLink: "https://github.com/yourusername/transfer-learning-research"
+        technologies: ["Deep Transfer Learning", "Explainable AI", "CNN", "BiLSTM"],
+        projectLink: "#",
+        githubLink: "#"
     },
-    res3: {
-        title: "GAN-based Image Synthesis",
+    "res3": {
+        title: "A Comprehensive Epidemiological Dengue Dataset of Bangladesh",
         icon: "fas fa-network-wired",
-        description: "Research on Generative Adversarial Networks for medical image augmentation. Addresses data scarcity in medical AI by generating synthetic training images that preserve clinical relevance.",
+        description: "A Comprehensive Epidemiological Dengue Dataset of Bangladesh. Impapactful opensource Dataset to predict Dengue disease.",
         features: [
-            "Custom GAN architecture for medical images",
-            "Quality assessment metrics",
-            "Clinical validation with radiologists",
-            "Data augmentation pipeline",
-            "Conditional image generation",
-            "Extensive experimentation and analysis",
-            "Published findings and open-source implementation"
+            "Large-scale data collection and analysis",
+            "Statistical analysis for epidemiology",
+            "Machine learning feature extraction",
+            "Peer-reviewed publication",
+            "Publicly available research dataset"
         ],
-        technologies: ["GAN", "PyTorch", "Image Generation", "Python", "NumPy", "Matplotlib", "CUDA"],
-        projectLink: "https://arxiv.org/example-gan",
-        githubLink: "https://github.com/yourusername/gan-research"
+        technologies: ["Research Methodologies", "Research Data", "Data Analysis", "Disease Detection"],
+        projectLink: "#",
+        githubLink: "#"
     }
 };
 
@@ -1042,7 +1179,7 @@ function initializeProjectTabs() {
     const projectCategoryContents = document.querySelectorAll('.project-category-content');
 
     projectTabButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const category = this.getAttribute('data-project-category');
 
             // Remove active class from all tabs
@@ -1064,7 +1201,7 @@ function initializeProjectModal() {
     const modalClose = modal.querySelector('.modal-close');
 
     projectCards.forEach(card => {
-        card.addEventListener('click', function() {
+        card.addEventListener('click', function () {
             const projectId = this.getAttribute('data-project');
             showProjectModal(projectId);
         });
